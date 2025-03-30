@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lanceur de Dés - Correction</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .dice-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+            gap: 20px;
+        }
+        
+        .dice {
+            width: 100px;
+            height: 100px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            display: grid;
+            grid-template-areas: 
+                "a . c"
+                "e g f"
+                "d . b";
+            padding: 10px;
+            transition: transform 0.2s;
+        }
+        
+        .dot {
+            background-color: #333;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            margin: auto;
+        }
+        
+        /* Positionnement des points pour chaque face du dé */
+        .dice[data-value="1"] .dot:nth-child(1) { grid-area: g; }
+        
+        .dice[data-value="2"] .dot:nth-child(1) { grid-area: a; }
+        .dice[data-value="2"] .dot:nth-child(2) { grid-area: b; }
+        
+        .dice[data-value="3"] .dot:nth-child(1) { grid-area: a; }
+        .dice[data-value="3"] .dot:nth-child(2) { grid-area: g; }
+        .dice[data-value="3"] .dot:nth-child(3) { grid-area: b; }
+        
+        .dice[data-value="4"] .dot:nth-child(1) { grid-area: a; }
+        .dice[data-value="4"] .dot:nth-child(2) { grid-area: c; }
+        .dice[data-value="4"] .dot:nth-child(3) { grid-area: b; }
+        .dice[data-value="4"] .dot:nth-child(4) { grid-area: d; }
+        
+        .dice[data-value="5"] .dot:nth-child(1) { grid-area: a; }
+        .dice[data-value="5"] .dot:nth-child(2) { grid-area: c; }
+        .dice[data-value="5"] .dot:nth-child(3) { grid-area: g; }
+        .dice[data-value="5"] .dot:nth-child(4) { grid-area: b; }
+        .dice[data-value="5"] .dot:nth-child(5) { grid-area: d; }
+        
+        .dice[data-value="6"] .dot:nth-child(1) { grid-area: a; }
+        .dice[data-value="6"] .dot:nth-child(2) { grid-area: c; }
+        .dice[data-value="6"] .dot:nth-child(3) { grid-area: e; }
+        .dice[data-value="6"] .dot:nth-child(4) { grid-area: f; }
+        .dice[data-value="6"] .dot:nth-child(5) { grid-area: b; }
+        .dice[data-value="6"] .dot:nth-child(6) { grid-area: d; }
+        
+        /* Style pour le dé en attente de lancement */
+        .dice[data-value="0"] {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            font-weight: bold;
+            color: #888;
+        }
+        
+        .controls {
+            margin: 20px 0;
+        }
+        
+        select {
+            padding: 8px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            margin-right: 10px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        .result {
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            height: 50px;
+        }
+        
+        /* Animation pour le lancer de dés */
+        @keyframes roll {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.2); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+        
+        .rolling {
+            animation: roll 0.8s ease;
+        }
+    </style>
+</head>
+<body>
+    <h1>Lanceur de Dés</h1>
+    
+    <div class="controls">
+        <label for="dice-count">Nombre de dés:</label>
+        <select id="dice-count">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select>
+        <button id="roll-button">Lancer les dés</button>
+    </div>
+    
+    <div class="dice-container" id="dice-container">
+        <!-- Les dés seront générés en JavaScript -->
+    </div>
+    
+    <div class="result" id="result">
+        Lancez les dés pour commencer
+    </div>
+    
+    <script>
+        // Récupérer les éléments du DOM
+        const diceCountSelect = document.getElementById('dice-count');
+        const rollButton = document.getElementById('roll-button');
+        const diceContainer = document.getElementById('dice-container');
+        const resultDisplay = document.getElementById('result');
+        
+        // Variables pour stocker l'état du jeu
+        let diceValues = [];
+        let isRolling = false;
+        
+        // Ajouter un écouteur d'événements pour le bouton de lancer
+        rollButton.addEventListener('click', function() {
+            if (!isRolling) {
+                rollDice();
+            }
+        });
+        
+        // Ajouter un écouteur d'événements pour le changement du nombre de dés
+        diceCountSelect.addEventListener('change', function() {
+            updateDiceCount();
+        });
+        
+        // Fonction pour créer un dé avec le nombre de points approprié
+        function createDice(value = 0) {
+            const dice = document.createElement('div');
+            dice.className = 'dice';
+            dice.setAttribute('data-value', value);
+            
+            if (value === 0) {
+                // Dé en attente de lancement
+                dice.textContent = '?';
+            } else {
+                // Ajouter les points selon la valeur du dé
+                for (let i = 0; i < value; i++) {
+                    const dot = document.createElement('div');
+                    dot.className = 'dot';
+                    dice.appendChild(dot);
+                }
+            }
+            
+            return dice;
+        }
+        
+        // Fonction pour mettre à jour le nombre de dés affichés
+        function updateDiceCount() {
+            const count = parseInt(diceCountSelect.value);
+            
+            // Vider le conteneur
+            diceContainer.innerHTML = '';
+            diceValues = [];
+            
+            // Créer les dés
+            for (let i = 0; i < count; i++) {
+                const dice = createDice(0);
+                diceContainer.appendChild(dice);
+                diceValues.push(0);
+            }
+            
+            // Réinitialiser le résultat
+            resultDisplay.textContent = 'Lancez les dés pour commencer';
+        }
+        
+        // Fonction pour lancer les dés
+        function rollDice() {
+            isRolling = true;
+            rollButton.disabled = true;
+            
+            // Réinitialiser les dés pour l'animation
+            const dices = diceContainer.querySelectorAll('.dice');
+            dices.forEach(dice => {
+                dice.className = 'dice rolling';
+                dice.textContent = '';
+            });
+            
+            // Délai pour permettre à l'animation de se produire
+            setTimeout(() => {
+                // Générer de nouvelles valeurs pour chaque dé
+                let total = 0;
+                
+                dices.forEach((dice, index) => {
+                    // Générer une valeur aléatoire
+                    const value = getRandomDiceValue();
+                    diceValues[index] = value;
+                    total += value;
+                    
+                    // Mettre à jour l'affichage du dé
+                    dice.className = 'dice';
+                    dice.innerHTML = '';
+                    dice.setAttribute('data-value', value);
+                    
+                    // Ajouter les points selon la valeur du dé
+                    for (let i = 0; i < value; i++) {
+                        const dot = document.createElement('div');
+                        dot.className = 'dot';
+                        dice.appendChild(dot);
+                    }
+                });
+                
+                // Afficher le résultat total
+                resultDisplay.textContent = `Résultat: ${total}`;
+                
+                // Réactiver le bouton
+                isRolling = false;
+                rollButton.disabled = false;
+            }, 800); // Correspondre à la durée de l'animation
+        }
+        
+        // Fonction pour générer un nombre aléatoire entre 1 et 6
+        function getRandomDiceValue() {
+            return Math.floor(Math.random() * 6) + 1;
+        }
+        
+        // Initialiser l'affichage au chargement de la page
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDiceCount();
+        });
+    </script>
+</body>
+</html>
