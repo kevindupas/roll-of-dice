@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercice 1 - Lancer de dé basique</title>
+</head>
+<body>
+    <h1>Exercice 1 - Lancer de dé basique</h1>
+    <p>Ouvrez la console pour voir le résultat (F12 ou clic droit > Inspecter > Console)</p>
+
+    <script>
+        // Fonction qui simule un lancer de dé à 6 faces
+        function lancerDe() {
+            // Génère un nombre aléatoire entre 1 et 6
+            // Math.random() génère un nombre entre 0 (inclus) et 1 (exclus)
+            // On multiplie par 6 pour obtenir un nombre entre 0 et 5.999...
+            // Math.floor() arrondit à l'entier inférieur
+            // On ajoute 1 pour obtenir un nombre entre 1 et 6
+            const resultat = Math.floor(Math.random() * 6) + 1;
+            
+            // Affiche le résultat dans la console
+            console.log("Résultat du lancer de dé:", resultat);
+            
+            return resultat;
+        }
+        
+        // Appelle la fonction au chargement de la page
+        window.onload = function() {
+            console.log("Lancement du dé au chargement de la page:");
+            lancerDe();
+        };
+    </script>
+</body>
+</html>
