@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercice 2 - Lancer de dé avec affichage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        #resultat {
+            font-size: 24px;
+            margin: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            display: inline-block;
+            min-width: 100px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Exercice 2 - Lancer de dé avec affichage</h1>
+    
+    <div>Résultat du lancer de dé:</div>
+    <div id="resultat">?</div>
+
+    <script>
+        // Fonction qui simule un lancer de dé à 6 faces
+        function lancerDe() {
+            // Génère un nombre aléatoire entre 1 et 6
+            const resultat = Math.floor(Math.random() * 6) + 1;
+            
+            // Affiche le résultat dans la console (pour déboguer)
+            console.log("Résultat du lancer de dé:", resultat);
+            
+            // Récupère l'élément HTML où afficher le résultat
+            const elementResultat = document.getElementById("resultat");
+            
+            // Affiche le résultat dans l'élément HTML
+            elementResultat.textContent = resultat;
+            
+            return resultat;
+        }
+        
+        // Appelle la fonction au chargement de la page
+        window.onload = function() {
+            lancerDe();
+        };
+    </script>
+</body>
+</html>
