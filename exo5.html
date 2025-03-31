@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercice 5 - Choix du nombre de dés</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        .controles {
+            margin: 20px 0;
+        }
+        select {
+            padding: 8px;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        .resultats {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .de {
+            font-size: 24px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            min-width: 50px;
+            background-color: #f9f9f9;
+        }
+        .somme {
+            font-size: 24px;
+            padding: 15px;
+            border: 1px solid #4CAF50;
+            min-width: 50px;
+            background-color: #e9ffe9;
+            margin-top: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Exercice 5 - Choix du nombre de dés</h1>
+    
+    <div class="controles">
+        <label for="nbDes">Nombre de dés:</label>
+        <select id="nbDes">
+            <option value="1">1</option>
+            <option value="2" selected>2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select>
+        
+        <button id="btnLancer">Lancer les dés</button>
+    </div>
+    
+    <div>Résultats des lancers:</div>
+    <div id="resultats" class="resultats">
+        <!-- Les dés seront générés dynamiquement ici -->
+    </div>
+    
+    <div>Somme:</div>
+    <div class="somme" id="somme">?</div>
+
+    <script>
+        // Fonction qui simule un lancer de dé à 6 faces
+        function lancerDe() {
+            return Math.floor(Math.random() * 6) + 1;
+        }
+        
+        // Fonction qui lance les dés et affiche les résultats
+        function lancerLesDes() {
+            // Récupérer le nombre de dés sélectionné
+            const nbDes = parseInt(document.getElementById("nbDes").value);
+            
+            // Créer un tableau pour stocker les résultats
+            const resultats = [];
+            
+            // Lancer les dés et stocker les résultats
+            for (let i = 0; i < nbDes; i++) {
+                resultats.push(lancerDe());
+            }
+            
+            // Calculer la somme
+            const somme = resultats.reduce((acc, val) => acc + val, 0);
+            
+            // Afficher les résultats dans la console (pour déboguer)
+            console.log("Résultats:", resultats);
+            console.log("Somme:", somme);
+            
+            // Récupérer le conteneur des résultats
+            const conteneurResultats = document.getElementById("resultats");
+            
+            // Vider le conteneur
+            conteneurResultats.innerHTML = "";
+            
+            // Créer et ajouter les éléments pour chaque dé
+            for (let i = 0; i < resultats.length; i++) {
+                const elementDe = document.createElement("div");
+                elementDe.className = "de";
+                elementDe.textContent = resultats[i];
+                conteneurResultats.appendChild(elementDe);
+            }
+            
+            // Afficher la somme
+            document.getElementById("somme").textContent = somme;
+        }
+        
+        // Fonction pour mettre à jour le nombre de dés affichés
+        function mettreAJourAffichage() {
+            // Récupérer le nombre de dés sélectionné
+            const nbDes = parseInt(document.getElementById("nbDes").value);
+            
+            // Récupérer le conteneur des résultats
+            const conteneurResultats = document.getElementById("resultats");
+            
+            // Vider le conteneur
+            conteneurResultats.innerHTML = "";
+            
+            // Créer les éléments pour chaque dé (avec ? comme contenu initial)
+            for (let i = 0; i < nbDes; i++) {
+                const elementDe = document.createElement("div");
+                elementDe.className = "de";
+                elementDe.textContent = "?";
+                conteneurResultats.appendChild(elementDe);
+            }
+            
+            // Réinitialiser la somme
+            document.getElementById("somme").textContent = "?";
+        }
+        
+        // Attendre que la page soit complètement chargée
+        window.onload = function() {
+            // Récupérer les éléments
+            const boutonLancer = document.getElementById("btnLancer");
+            const selectNbDes = document.getElementById("nbDes");
+            
+            // Ajouter un écouteur d'événement au clic sur le bouton
+            boutonLancer.addEventListener("click", lancerLesDes);
+            
+            // Ajouter un écouteur d'événement au changement du nombre de dés
+            selectNbDes.addEventListener("change", mettreAJourAffichage);
+            
+            // Initialiser l'affichage
+            mettreAJourAffichage();
+        };
+    </script>
+</body>
+</html>
