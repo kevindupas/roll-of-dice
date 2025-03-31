@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercice 7 - Lanceur de dés visuels avec historique</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .dice-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .dice {
+            width: 100px;
+            height: 100px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            display: grid;
+            grid-template-areas: 
+                "a . c"
+                "e g f"
+                "d . b";
+            padding: 10px;
+            transition: transform 0.2s;
+        }
+        
+        .dot {
+            background-color: #333;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            margin: auto;
+        }
+        
+        /* Positionnement des points pour chaque face du dé */
+        .dice[data-value="1"] .dot:nth-child(1) { grid-area: g; }
+        
+        .dice[data-value="2"] .dot:nth-child(1) { grid-area: a; }
+        .dice[data-value="2"] .dot:nth-child(2) { grid-area: b; }
+        
+        .dice[data-value="3"] .dot:nth-child(1) { grid-area: a; }
+        .dice[data-value="3"] .dot:nth-child(2) { grid-area: g; }
+        .dice[data-value="3"] .dot:nth-child(3) { grid-area: b; }
+        
+        .dice[data-value="4"] .dot:nth-child(1) { grid-area: a; }
+        .dice[data-value="4"] .dot:nth-child(2) { grid-area: c; }
+        .dice[data-value="4"] .dot:nth-child(3) { grid-area: b; }
+        .dice[data-value="4"] .dot:nth-child(4) { grid-area: d; }
+        
+        .dice[data-value="5"] .dot:nth-child(1) { grid-area: a; }
+        .dice[data-value="5"] .dot:nth-child(2) { grid-area: c; }
+        .dice[data-value="5"] .dot:nth-child(3) { grid-area: g; }
+        .dice[data-value="5"] .dot:nth-child(4) { grid-area: b; }
+        .dice[data-value="5"] .dot:nth-child(5) { grid-area: d; }
+        
+        .dice[data-value="6"] .dot:nth-child(1) { grid-area: a; }
+        .dice[data-value="6"] .dot:nth-child(2) { grid-area: c; }
+        .dice[data-value="6"] .dot:nth-child(3) { grid-area: e; }
+        .dice[data-value="6"] .dot:nth-child(4) { grid-area: f; }
+        .dice[data-value="6"] .dot:nth-child(5) { grid-area: b; }
+        .dice[data-value="6"] .dot:nth-child(6) { grid-area: d; }
+        
+        /* Style pour le dé en attente de lancement */
+        .dice[data-value="0"] {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            font-weight: bold;
+            color: #888;
+        }
+        
+        .controls {
+            margin: 20px 0;
+        }
+        
+        select {
+            padding: 8px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            margin-right: 10px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        .result {
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            height: 50px;
+        }
+        
+        /* Animation pour le lancer de dés */
+        @keyframes roll {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.2); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+        
+        .rolling {
+            animation: roll 0.8s ease;
+        }
+        
+        /* Styles pour l'historique */
+        .historique {
+            margin-top: 40px;
+            border-top: 1px solid #ccc;
+            padding-top: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .historique h2 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .historique-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+        
+        .lancer-record {
+            width: 90%;
+            padding: 15px;
+            margin: 5px 0;
+            border-radius: 5px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: left;
+            position: relative;
+        }
+        
+        .lancer-record:nth-child(even) {
+            background-color: #f0f8ff;
+        }
+        
+        .lancer-timestamp {
+            font-size: 0.8em;
+            color: #777;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        
+        .mini-dice-container {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        
+        .mini-dice {
+            width: 30px;
+            height: 30px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+        }
+        
+        .lancer-somme {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        
+        #btnEffacer {
+            background-color: #f44336;
+            margin-top: 15px;
+        }
+        
+        #btnEffacer:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <h1>Lanceur de Dés</h1>
+    
+    <div class="controls">
+        <label for="dice-count">Nombre de dés:</label>
+        <select id="dice-count">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select>
+        <button id="roll-button">Lancer les dés</button>
+    </div>
+    
+    <div class="dice-container" id="dice-container">
+        <!-- Les dés seront générés en JavaScript -->
+    </div>
+    
+    <div class="result" id="result">
+        Lancez les dés pour commencer
+    </div>
+    
+    <div class="historique">
+        <h2>Historique des lancers</h2>
+        <div class="historique-container" id="historique-container">
+            <!-- L'historique sera généré en JavaScript -->
+            <p id="no-history">Aucun lancer effectué pour le moment.</p>
+        </div>
+        <button id="btnEffacer">Effacer l'historique</button>
+    </div>
+    
+    <script>
+        // Récupérer les éléments du DOM
+        const diceCountSelect = document.getElementById('dice-count');
+        const rollButton = document.getElementById('roll-button');
+        const diceContainer = document.getElementById('dice-container');
+        const resultDisplay = document.getElementById('result');
+        const historiqueContainer = document.getElementById('historique-container');
+        const btnEffacer = document.getElementById('btnEffacer');
+        const noHistoryMsg = document.getElementById('no-history');
+        
+        // Variables pour stocker l'état du jeu
+        let diceValues = [];
+        let isRolling = false;
+        let historiqueLancers = [];
+        
+        // Ajouter un écouteur d'événements pour le bouton de lancer
+        rollButton.addEventListener('click', function() {
+            if (!isRolling) {
+                rollDice();
+            }
+        });
+        
+        // Ajouter un écouteur d'événements pour le changement du nombre de dés
+        diceCountSelect.addEventListener('change', function() {
+            updateDiceCount();
+        });
+        
+        // Ajouter un écouteur d'événements pour le bouton d'effacement de l'historique
+        btnEffacer.addEventListener('click', function() {
+            effacerHistorique();
+        });
+        
+        // Fonction pour créer un dé avec le nombre de points approprié
+        function createDice(value = 0) {
+            const dice = document.createElement('div');
+            dice.className = 'dice';
+            dice.setAttribute('data-value', value);
+            
+            if (value === 0) {
+                // Dé en attente de lancement
+                dice.textContent = '?';
+            } else {
+                // Ajouter les points selon la valeur du dé
+                for (let i = 0; i < value; i++) {
+                    const dot = document.createElement('div');
+                    dot.className = 'dot';
+                    dice.appendChild(dot);
+                }
+            }
+            
+            return dice;
+        }
+        
+        // Fonction pour mettre à jour le nombre de dés affichés
+        function updateDiceCount() {
+            const count = parseInt(diceCountSelect.value);
+            
+            // Vider le conteneur
+            diceContainer.innerHTML = '';
+            diceValues = [];
+            
+            // Créer les dés
+            for (let i = 0; i < count; i++) {
+                const dice = createDice(0);
+                diceContainer.appendChild(dice);
+                diceValues.push(0);
+            }
+            
+            // Réinitialiser le résultat
+            resultDisplay.textContent = 'Lancez les dés pour commencer';
+        }
+        
+        // Fonction pour lancer les dés
+        function rollDice() {
+            isRolling = true;
+            rollButton.disabled = true;
+            
+            // Réinitialiser les dés pour l'animation
+            const dices = diceContainer.querySelectorAll('.dice');
+            dices.forEach(dice => {
+                dice.className = 'dice rolling';
+                dice.textContent = '';
+            });
+            
+            // Délai pour permettre à l'animation de se produire
+            setTimeout(() => {
+                // Générer de nouvelles valeurs pour chaque dé
+                let total = 0;
+                diceValues = [];
+                
+                dices.forEach((dice, index) => {
+                    // Générer une valeur aléatoire
+                    const value = getRandomDiceValue();
+                    diceValues.push(value);
+                    total += value;
+                    
+                    // Mettre à jour l'affichage du dé
+                    dice.className = 'dice';
+                    dice.innerHTML = '';
+                    dice.setAttribute('data-value', value);
+                    
+                    // Ajouter les points selon la valeur du dé
+                    for (let i = 0; i < value; i++) {
+                        const dot = document.createElement('div');
+                        dot.className = 'dot';
+                        dice.appendChild(dot);
+                    }
+                });
+                
+                // Afficher le résultat total
+                resultDisplay.textContent = `Résultat: ${total}`;
+                
+                // Ajouter ce lancer à l'historique
+                ajouterAHistorique(parseInt(diceCountSelect.value), diceValues, total);
+                
+                // Réactiver le bouton
+                isRolling = false;
+                rollButton.disabled = false;
+            }, 800); // Correspondre à la durée de l'animation
+        }
+        
+        // Fonction pour générer un nombre aléatoire entre 1 et 6
+        function getRandomDiceValue() {
+            return Math.floor(Math.random() * 6) + 1;
+        }
+        
+        // Fonction pour ajouter un lancer à l'historique
+        function ajouterAHistorique(nbDes, resultats, somme) {
+            // Obtenir l'heure actuelle
+            const maintenant = new Date();
+            const heureFormatee = maintenant.getHours().toString().padStart(2, '0') + ':' + 
+                                maintenant.getMinutes().toString().padStart(2, '0') + ':' +
+                                maintenant.getSeconds().toString().padStart(2, '0');
+            
+            // Créer un objet pour représenter ce lancer
+            const lancer = {
+                timestamp: maintenant,
+                heure: heureFormatee,
+                nbDes: nbDes,
+                resultats: [...resultats],
+                somme: somme
+            };
+            
+            // Ajouter le lancer au début de l'historique (le plus récent en premier)
+            historiqueLancers.unshift(lancer);
+            
+            // Mettre à jour l'affichage de l'historique
+            mettreAJourHistorique();
+        }
+        
+        // Fonction pour mettre à jour l'affichage de l'historique
+        function mettreAJourHistorique() {
+            // Cacher le message "Aucun lancer" s'il y a des lancers
+            if (historiqueLancers.length > 0) {
+                if (noHistoryMsg) {
+                    noHistoryMsg.style.display = 'none';
+                }
+            }
+            
+            // Vider le conteneur d'historique (sauf le message "Aucun lancer")
+            const elementsASupprimer = historiqueContainer.querySelectorAll('.lancer-record');
+            elementsASupprimer.forEach(el => el.remove());
+            
+            // Si l'historique est vide, afficher le message
+            if (historiqueLancers.length === 0) {
+                if (noHistoryMsg) {
+                    noHistoryMsg.style.display = 'block';
+                } else {
+                    const message = document.createElement('p');
+                    message.id = 'no-history';
+                    message.textContent = 'Aucun lancer effectué pour le moment.';
+                    historiqueContainer.appendChild(message);
+                }
+                return;
+            }
+            
+            // Ajouter chaque lancer à l'historique
+            historiqueLancers.forEach((lancer, index) => {
+                // Créer l'élément pour le lancer
+                const lancerElement = document.createElement('div');
+                lancerElement.className = 'lancer-record';
+                
+                // Ajouter l'horodatage
+                const timestampElement = document.createElement('div');
+                timestampElement.className = 'lancer-timestamp';
+                timestampElement.textContent = lancer.heure;
+                lancerElement.appendChild(timestampElement);
+                
+                // Ajouter le titre
+                const titreElement = document.createElement('div');
+                titreElement.textContent = `Lancer de ${lancer.nbDes} dé${lancer.nbDes > 1 ? 's' : ''}`;
+                titreElement.style.fontWeight = 'bold';
+                lancerElement.appendChild(titreElement);
+                
+                // Créer le conteneur pour les mini-dés
+                const miniDiceContainer = document.createElement('div');
+                miniDiceContainer.className = 'mini-dice-container';
+                
+                // Ajouter un mini-dé pour chaque résultat
+                lancer.resultats.forEach(valeur => {
+                    const miniDice = document.createElement('div');
+                    miniDice.className = 'mini-dice';
+                    miniDice.textContent = valeur;
+                    miniDiceContainer.appendChild(miniDice);
+                });
+                
+                lancerElement.appendChild(miniDiceContainer);
+                
+                // Ajouter la somme
+                const sommeElement = document.createElement('div');
+                sommeElement.className = 'lancer-somme';
+                sommeElement.textContent = `Somme: ${lancer.somme}`;
+                lancerElement.appendChild(sommeElement);
+                
+                // Ajouter l'élément au conteneur d'historique
+                historiqueContainer.appendChild(lancerElement);
+            });
+        }
+        
+        // Fonction pour effacer l'historique
+        function effacerHistorique() {
+            historiqueLancers = [];
+            mettreAJourHistorique();
+        }
+        
+        // Initialiser l'affichage au chargement de la page
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDiceCount();
+        });
+    </script>
+</body>
+</html>
