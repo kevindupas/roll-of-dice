@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercice 6 - Historique des lancers</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        .controles {
+            margin: 20px 0;
+        }
+        select {
+            padding: 8px;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        .resultats {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .de {
+            font-size: 24px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            min-width: 50px;
+            background-color: #f9f9f9;
+        }
+        .somme {
+            font-size: 24px;
+            padding: 15px;
+            border: 1px solid #4CAF50;
+            min-width: 50px;
+            background-color: #e9ffe9;
+            margin-top: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            margin: 0 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .historique {
+            margin-top: 30px;
+            border-top: 1px solid #ccc;
+            padding-top: 20px;
+        }
+        .historique h2 {
+            margin-bottom: 10px;
+        }
+        .lancer-record {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #f9f9f9;
+            text-align: left;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .lancer-record:nth-child(even) {
+            background-color: #f0f0f0;
+        }
+        .boutons-historique {
+            margin-top: 15px;
+        }
+        #btnEffacer {
+            background-color: #f44336;
+        }
+        #btnEffacer:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <h1>Exercice 6 - Historique des lancers</h1>
+    
+    <div class="controles">
+        <label for="nbDes">Nombre de dés:</label>
+        <select id="nbDes">
+            <option value="1">1</option>
+            <option value="2" selected>2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select>
+        
+        <button id="btnLancer">Lancer les dés</button>
+    </div>
+    
+    <div>Résultats des lancers:</div>
+    <div id="resultats" class="resultats">
+        <!-- Les dés seront générés dynamiquement ici -->
+    </div>
+    
+    <div>Somme:</div>
+    <div class="somme" id="somme">?</div>
+    
+    <div class="historique">
+        <h2>Historique des lancers</h2>
+        <div id="listeHistorique">
+            <!-- L'historique sera généré dynamiquement ici -->
+            <p>Aucun lancer pour le moment.</p>
+        </div>
+        
+        <div class="boutons-historique">
+            <button id="btnEffacer">Effacer l'historique</button>
+        </div>
+    </div>
+
+    <script>
+        // Tableau pour stocker l'historique des lancers
+        let historiqueLancers = [];
+        
+        // Fonction qui simule un lancer de dé à 6 faces
+        function lancerDe() {
+            return Math.floor(Math.random() * 6) + 1;
+        }
+        
+        // Fonction qui lance les dés et affiche les résultats
+        function lancerLesDes() {
+            // Récupérer le nombre de dés sélectionné
+            const nbDes = parseInt(document.getElementById("nbDes").value);
+            
+            // Créer un tableau pour stocker les résultats
+            const resultats = [];
+            
+            // Lancer les dés et stocker les résultats
+            for (let i = 0; i < nbDes; i++) {
+                resultats.push(lancerDe());
+            }
+            
+            // Calculer la somme
+            const somme = resultats.reduce((acc, val) => acc + val, 0);
+            
+            // Afficher les résultats dans la console (pour déboguer)
+            console.log("Résultats:", resultats);
+            console.log("Somme:", somme);
+            
+            // Récupérer le conteneur des résultats
+            const conteneurResultats = document.getElementById("resultats");
+            
+            // Vider le conteneur
+            conteneurResultats.innerHTML = "";
+            
+            // Créer et ajouter les éléments pour chaque dé
+            for (let i = 0; i < resultats.length; i++) {
+                const elementDe = document.createElement("div");
+                elementDe.className = "de";
+                elementDe.textContent = resultats[i];
+                conteneurResultats.appendChild(elementDe);
+            }
+            
+            // Afficher la somme
+            document.getElementById("somme").textContent = somme;
+            
+            // Ajouter ce lancer à l'historique
+            ajouterAHistorique(nbDes, resultats, somme);
+        }
+        
+        // Fonction pour ajouter un lancer à l'historique
+        function ajouterAHistorique(nbDes, resultats, somme) {
+            // Obtenir l'heure actuelle
+            const maintenant = new Date();
+            const heureFormatee = maintenant.getHours().toString().padStart(2, '0') + ':' + 
+                                maintenant.getMinutes().toString().padStart(2, '0') + ':' +
+                                maintenant.getSeconds().toString().padStart(2, '0');
+            
+            // Créer un objet pour représenter ce lancer
+            const lancer = {
+                timestamp: maintenant,
+                heure: heureFormatee,
+                nbDes: nbDes,
+                resultats: [...resultats],
+                somme: somme
+            };
+            
+            // Ajouter le lancer au début de l'historique (le plus récent en premier)
+            historiqueLancers.unshift(lancer);
+            
+            // Mettre à jour l'affichage de l'historique
+            mettreAJourHistorique();
+        }
+        
+        // Fonction pour mettre à jour l'affichage de l'historique
+        function mettreAJourHistorique() {
+            const listeHistorique = document.getElementById("listeHistorique");
+            
+            // Vider la liste actuelle
+            listeHistorique.innerHTML = "";
+            
+            // Si l'historique est vide, afficher un message
+            if (historiqueLancers.length === 0) {
+                listeHistorique.innerHTML = "<p>Aucun lancer pour le moment.</p>";
+                return;
+            }
+            
+            // Ajouter chaque lancer à la liste
+            for (const lancer of historiqueLancers) {
+                const elementLancer = document.createElement("div");
+                elementLancer.className = "lancer-record";
+                
+                // Formater l'affichage des résultats
+                let texteResultats = lancer.resultats.join(", ");
+                
+                // Créer le contenu HTML de l'élément
+                elementLancer.innerHTML = `
+                    <div><strong>${lancer.heure}</strong> - Lancer de ${lancer.nbDes} dé${lancer.nbDes > 1 ? 's' : ''}</div>
+                    <div>Résultats: ${texteResultats}</div>
+                    <div>Somme: ${lancer.somme}</div>
+                `;
+                
+                // Ajouter l'élément à la liste
+                listeHistorique.appendChild(elementLancer);
+            }
+        }
+        
+        // Fonction pour effacer l'historique
+        function effacerHistorique() {
+            // Vider le tableau d'historique
+            historiqueLancers = [];
+            
+            // Mettre à jour l'affichage
+            mettreAJourHistorique();
+        }
+        
+        // Fonction pour mettre à jour le nombre de dés affichés
+        function mettreAJourAffichage() {
+            // Récupérer le nombre de dés sélectionné
+            const nbDes = parseInt(document.getElementById("nbDes").value);
+            
+            // Récupérer le conteneur des résultats
+            const conteneurResultats = document.getElementById("resultats");
+            
+            // Vider le conteneur
+            conteneurResultats.innerHTML = "";
+            
+            // Créer les éléments pour chaque dé (avec ? comme contenu initial)
+            for (let i = 0; i < nbDes; i++) {
+                const elementDe = document.createElement("div");
+                elementDe.className = "de";
+                elementDe.textContent = "?";
+                conteneurResultats.appendChild(elementDe);
+            }
+            
+            // Réinitialiser la somme
+            document.getElementById("somme").textContent = "?";
+        }
+        
+        // Attendre que la page soit complètement chargée
+        window.onload = function() {
+            // Récupérer les éléments
+            const boutonLancer = document.getElementById("btnLancer");
+            const selectNbDes = document.getElementById("nbDes");
+            const boutonEffacer = document.getElementById("btnEffacer");
+            
+            // Ajouter un écouteur d'événement au clic sur le bouton lancer
+            boutonLancer.addEventListener("click", lancerLesDes);
+            
+            // Ajouter un écouteur d'événement au changement du nombre de dés
+            selectNbDes.addEventListener("change", mettreAJourAffichage);
+            
+            // Ajouter un écouteur d'événement au clic sur le bouton effacer
+            boutonEffacer.addEventListener("click", effacerHistorique);
+            
+            // Initialiser l'affichage
+            mettreAJourAffichage();
+        };
+    </script>
+</body>
+</html>
