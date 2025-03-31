@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercice 3 - Lancer de dé avec bouton</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        #resultat {
+            font-size: 24px;
+            margin: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            display: inline-block;
+            min-width: 100px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Exercice 3 - Lancer de dé avec bouton</h1>
+    
+    <div>Résultat du lancer de dé:</div>
+    <div id="resultat">?</div>
+    
+    <button id="btnLancer">Lancer le dé</button>
+
+    <script>
+        // Fonction qui simule un lancer de dé à 6 faces
+        function lancerDe() {
+            // Génère un nombre aléatoire entre 1 et 6
+            const resultat = Math.floor(Math.random() * 6) + 1;
+            
+            // Affiche le résultat dans la console (pour déboguer)
+            console.log("Résultat du lancer de dé:", resultat);
+            
+            // Récupère l'élément HTML où afficher le résultat
+            const elementResultat = document.getElementById("resultat");
+            
+            // Affiche le résultat dans l'élément HTML
+            elementResultat.textContent = resultat;
+            
+            return resultat;
+        }
+        
+        // Attendre que la page soit complètement chargée
+        window.onload = function() {
+            // Récupérer le bouton
+            const boutonLancer = document.getElementById("btnLancer");
+            
+            // Ajouter un écouteur d'événement au clic sur le bouton
+            boutonLancer.addEventListener("click", function() {
+                lancerDe();
+            });
+            
+            // Note: On ne lance plus le dé automatiquement au chargement de la page
+            // L'utilisateur doit maintenant cliquer sur le bouton
+        };
+    </script>
+</body>
+</html>
